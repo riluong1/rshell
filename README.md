@@ -1,6 +1,6 @@
 # rshell
 
-**Program Basics <h1>
+<h1> Program Basics 
 
 This rshell program simulates the bash executables and the Unix interpreter command line, written in C++. With this program, we are able to execute simple commands such as ls, echo, mkdir, etc. The purpose of the shell command line is to read, interpret, and execute commands.
 
@@ -8,7 +8,7 @@ This rshell program simulates the bash executables and the Unix interpreter comm
 
 
 
-**Current Bugs: <h2>
+<h2>**Current Bugs:
 
 - The exit command does not follow the rules of the connector. The exit command exits regardless if the first test fails or succeeds using the OR connector, and the exit command also exits regardless of the AND connector.
 
