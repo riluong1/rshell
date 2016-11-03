@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
         comments = false;
         
         
-        cout << "$ ";
+        cout << userName << "@" << (getUserName(userName)) <<  "$ ";
         getline(cin, commandString);
         char_separator<char> delim(" ", delimitor);
         tokenizer< char_separator<char> > token(commandString, delim);
@@ -145,8 +145,6 @@ int main(int argc, char **argv) {
 
         for (unsigned i = 0; i < parse.size(); i++) {
            command.push_back(const_cast<char*>(parse.at(i).c_str()));
-
-            const char* temp = command.at(command.size() - 1);
             
             if (strcmp(command.at(command.size() - 1), "exit") == 0) { 
                 exit(0);
