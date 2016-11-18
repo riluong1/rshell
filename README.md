@@ -2,7 +2,7 @@
 
 <h1> Program Basics 
 
-This rshell program simulates the bash executables and the Unix interpreter command line, written in C++. With this program, we are able to execute simple commands such as ls, echo, mkdir, etc with connectors. The purpose of the shell command line is to read, interpret, and execute commands.
+This rshell program simulates the bash executables and the Unix interpreter command line, written in C++. With this program, we are able to execute simple commands such as ls, echo, mkdir, etc with connectors. The purpose of the shell command line is to read, interpret, and execute commands. Rshell also has the test operator and precedence operator.
 
 
 
@@ -15,3 +15,5 @@ This rshell program simulates the bash executables and the Unix interpreter comm
 - For the AND connector, if the first command the second command are false, a semicolon followed by a command will not execute.
 
 - Some chains of commands produce incorrect input specifically involving the AND and OR connectors.
+
+- When using the precedence operator, if a ( or ) is missing, rshell will not wait for a finishing or starting parentheses. It will print out an error message.
