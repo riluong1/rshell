@@ -8,6 +8,7 @@
 #include <boost/tokenizer.hpp>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 
 using namespace boost;
@@ -51,6 +52,76 @@ bool runcmd (vector <char*> command) {
     }
 
     return false;
+}
+
+bool runTest(vector <char*> command)
+{
+    command.pop_back();
+    
+    
+
+if (command.size() == 1) 
+{
+    cout << "(False)\n";
+    return false;
+}
+
+    const char* NAME_OF_PATH = command.at(command.size() - 1);
+    const char* flag = command.at(command.size() - 2);
+    struct stat sb;
+    int fileinfo = stat(NAME_OF_PATH, &sb);
+    
+   
+    
+    if (strcmp(command.at(command.size() - 2), "test") == 0) 
+    {
+        if (fileinfo == 0)
+        {
+            cout << "(True)\n";
+            return true; 
+        }
+        cout << "(False)\n";
+        return false;
+    }
+        else if (strcmp(flag, "-e") == 0 || strcmp(flag, "[") == 0)
+    {
+        if (fileinfo == 0)
+        {
+            cout << "(True)\n";
+            return true; 
+        }
+        cout << "(False)\n";
+        return false;
+    }
+    
+    else if (strcmp(flag, "-f") == 0)
+    { 
+        if (S_ISREG(sb.st_mode)) 
+        {
+             cout << "(True)\n";
+             return true;
+        }
+        cout << "(False)\n";
+        return false;
+    }
+    
+    else if (strcmp(flag, "-d") == 0)
+    {
+        if (S_ISDIR(sb.st_mode))
+        {
+            cout << "(True)\n";
+            return true;
+        }
+        cout << "(False)\n";
+        return false;
+    }  
+
+ else 
+    {
+        cout << flag << "unary operator expected" << endl;
+        
+        return false;
+    }
 }
 
 
@@ -108,6 +179,26 @@ void commandOr (vector <char*> &command, bool &previous) {
 
     return;
 }
+void autorun(vector <char *> &command, bool &comments, bool &previous, bool &isTest) {
+    if (command.size() >= 1 && previous && !comments) {
+      
+        if (!isTest) {
+            runcmd(command);
+        }
+        else {
+            
+            command.push_back('\0');
+            
+         
+            runTest(command);
+            
+        }
+        //even though there may be no comments/connectors,
+        //we still need to exec the command 
+    }
+    return;
+  //does nothing if it has comments (#) or is a connector command
+}
 
 typedef tokenizer<char_separator<char> > token;
 
@@ -121,6 +212,7 @@ int main(int argc, char **argv) {
     
     bool previous = true;
     bool comments = true;
+    bool isTest = true;
 
     while (true) {
         
@@ -132,8 +224,10 @@ int main(int argc, char **argv) {
         comments = false;
         
         
-        cout << userName << "@" << (getUserName(userName)) <<  "$ ";
+        //cout << userName << "@" << (getUserName(userName)) <<  "$ ";
+        cout << "$ ";
         getline(cin, commandString);
+
         char_separator<char> delim(" ", delimitor);
         tokenizer< char_separator<char> > token(commandString, delim);
        
@@ -145,6 +239,8 @@ int main(int argc, char **argv) {
 
         for (unsigned i = 0; i < parse.size(); i++) {
            command.push_back(const_cast<char*>(parse.at(i).c_str()));
+
+           
             
             if (strcmp(command.at(command.size() - 1), "exit") == 0) { 
                 exit(0);
@@ -163,6 +259,11 @@ int main(int argc, char **argv) {
                 commandAnd(command, previous);
                 
             }
+            else if (strcmp(command.at(command.size() - 1), "test") == 0) {
+                
+                isTest = true;
+                	
+            }
             
             else if (strcmp(command.at(command.size() - 1), "||") == 0) {
                 commandOr(command, previous);
@@ -171,13 +272,14 @@ int main(int argc, char **argv) {
         }
         
         
-         if (command.size() >= 1 && previous && !comments) {
-            runcmd(command);
-        }
+        autorun(command, comments, previous, isTest);
+        // new autorun function accommodates to the Test run execution
+        
         
     
     }  
     
     return 0; 
 }
+
 
