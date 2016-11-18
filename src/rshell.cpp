@@ -13,7 +13,7 @@
 
 using namespace boost;
 using namespace std;
-#define delimitor ";#"                    // token separators
+#define delimitor ";#()"                    // token separators
 
 
 bool runcmd (vector <char*> command) {
@@ -124,7 +124,12 @@ if (command.size() == 1)
     }
 }
 
+void TestConnectorCheck(command, previous, firstfail, isTest, tested, temp) {
+    
+    // Will check for connectors with test in progress
+}
 
+}
 string getUserName (char *userName) {
     char hostName[1024];
     if(gethostname(hostName, sizeof hostName) == -1) {
@@ -137,7 +142,6 @@ string getUserName (char *userName) {
 	    
     }
 
-    else {}
     return hostName;
 }
 
@@ -182,15 +186,14 @@ void commandOr (vector <char*> &command, bool &previous) {
 void autorun(vector <char *> &command, bool &comments, bool &previous, bool &isTest) {
     if (command.size() >= 1 && previous && !comments) {
       
-        if (!isTest) {
-            runcmd(command);
+        if (isTest = true) {
+            
+            command.push_back('\0');
+            runTest(command);
         }
         else {
             
-            command.push_back('\0');
-            
-         
-            runTest(command);
+            runcmd(command);
             
         }
         //even though there may be no comments/connectors,
@@ -213,6 +216,10 @@ int main(int argc, char **argv) {
     bool previous = true;
     bool comments = true;
     bool isTest = true;
+    bool tested = false;
+    
+    int LeftPar = 0;
+    int RightPar = 0;
 
     while (true) {
         
@@ -223,6 +230,8 @@ int main(int argc, char **argv) {
         previous = true;
         comments = false;
         
+        LeftPar = 0;
+        RightPar = 0;
         
         //cout << userName << "@" << (getUserName(userName)) <<  "$ ";
         cout << "$ ";
@@ -233,12 +242,42 @@ int main(int argc, char **argv) {
        
 
         for (token::iterator it = token.begin(); it != token.end(); it++) { 
+            
             parse.push_back(*it);
             
+            if (*it == "(") { 
+                   
+                   LeftPar++;
+               }
+               else if (*it == ")") {
+                   
+                   RightPar++;
+               }
+            
         }
+        
+        correctPar(parError, LeftPar, RightPar);
 
         for (unsigned i = 0; i < parse.size(); i++) {
            command.push_back(const_cast<char*>(parse.at(i).c_str()));
+           
+            tested = false;
+
+            const char* temp = command.at(command.size() - 1);
+           
+            if (isTest == true) {
+                if (strcmp(temp, "&&") == 0) {
+                    TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
+                }
+                
+                else if (strcmp(temp, "||") == 0) {
+                   TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
+                }
+                
+                else if (strcmp(temp, ";") == 0) {
+                    TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
+                }
+            }
 
            
             
@@ -266,31 +305,40 @@ int main(int argc, char **argv) {
             }
             
             else if (strcmp(command.at(command.size() - 1), "||") == 0) {
+                
                 commandOr(command, previous);
             }
-	    
-		else if (strcmp(command.at(command.size() - 1), "[") == 0) {
+            
+            else if (strcmp(command.at(command.size() - 1), "[") == 0) {
                 
                 isTest = true;
             }
             
             else if (strcmp(command.at(command.size() - 1), "]") == 0){
             
-                //delete ending symbolic bracket
+                //delete it and do nothing
                 command.pop_back();
+            }
+            else if (strcmp(command.at(command.size() - 1), "(") == 0) {
+            	
+            	frontParanthesis(command, previous, falseP);
+            }
+        
+            else if (strcmp(command.at(command.size() - 1), ")") == 0) {
+            	
+            	backParanthesis(command, previous, falseP);
             }
 
         }
         
         
         autorun(command, comments, previous, isTest);
-        // new autorun function accommodates to the Test run execution
         
-        
-    
     }  
     
     return 0; 
 }
+
+
 
 
