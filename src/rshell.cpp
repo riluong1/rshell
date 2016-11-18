@@ -268,6 +268,17 @@ int main(int argc, char **argv) {
             else if (strcmp(command.at(command.size() - 1), "||") == 0) {
                 commandOr(command, previous);
             }
+	    
+		else if (strcmp(command.at(command.size() - 1), "[") == 0) {
+                
+                isTest = true;
+            }
+            
+            else if (strcmp(command.at(command.size() - 1), "]") == 0){
+            
+                //delete ending symbolic bracket
+                command.pop_back();
+            }
 
         }
         
