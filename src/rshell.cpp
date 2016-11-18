@@ -8,11 +8,12 @@
 #include <boost/tokenizer.hpp>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 
 using namespace boost;
 using namespace std;
-#define delimitor ";#"                    // token separators
+#define delimitor ";#()"                    // token separators
 
 
 bool runcmd (vector <char*> command) {
@@ -53,6 +54,107 @@ bool runcmd (vector <char*> command) {
     return false;
 }
 
+bool runTest(vector <char*> command)
+{
+    //pops null character
+    command.pop_back();
+    
+    
+//checks for just test without any flags or any parameters
+if (command.size() == 1) 
+{
+    cout << "(False)\n";
+    return false;
+}
+
+    const char* NAME_OF_PATH = command.at(command.size() - 1);
+    const char* flag = command.at(command.size() - 2);
+    struct stat sb;
+    int fileinfo = stat(NAME_OF_PATH, &sb);
+    
+   
+    
+    if (strcmp(command.at(command.size() - 2), "test") == 0) 
+    {
+        if (fileinfo == 0)
+        {
+            cout << "(True)\n";  //prints true if it exist
+            return true; 
+        }
+        cout << "(False)\n"; //prints false if it does not exist
+        return false;
+    }
+        else if (strcmp(flag, "-e") == 0 || strcmp(flag, "[") == 0)
+    {
+        if (fileinfo == 0)
+        {
+            cout << "(True)\n";  //prints true if it exist 
+            return true; 
+        }
+        cout << "(False)\n";   //prints false if it does not exist
+        return false;
+    }
+    
+    else if (strcmp(flag, "-f") == 0)
+    { 
+        if (S_ISREG(sb.st_mode)) 
+        {
+             cout << "(True)\n";  //prints true if it exist and is a file
+             return true;
+        }
+        cout << "(False)\n";  //prints false if it exist and is not a file
+        return false;
+    }
+    
+    else if (strcmp(flag, "-d") == 0)
+    {
+        if (S_ISDIR(sb.st_mode))
+        {
+            cout << "(True)\n";  //prints true if it exist and is a directory
+            return true;
+        }
+        cout << "(False)\n";   //prints true if it exist and is not a directory
+        return false;
+    }  
+
+ else 
+    {
+        cout << flag << " unary operator expected" << endl;  //prints error if invalid flag is passed in
+        
+        return false;
+    }
+}
+
+void TestConnectorCheck(vector <char*> &command, bool &previous, bool &firstfail, bool &isTest, bool &tested, const char* temp) {
+    
+    // Will check for connectors with test 
+    
+    //Or command checker with test
+    if(previous == true)
+            {
+                if (strcmp(temp, "||") == 0)
+                {
+                    previous = !runTest(command);  //checks if the command failed
+                    firstfail = true;
+                }
+                else
+                {
+                    previous = runTest(command); //runs the command if the first comamnd did not fail
+                }
+            }
+          
+
+            if(firstfail)
+            {
+                firstfail = false;
+                previous = true;
+            }
+            isTest = false;
+            command.clear();  //clears it
+            tested = true;
+        return;
+}
+
 
 string getUserName (char *userName) {
     char hostName[1024];
@@ -66,7 +168,6 @@ string getUserName (char *userName) {
 	    
     }
 
-    else {}
     return hostName;
 }
 
@@ -108,6 +209,76 @@ void commandOr (vector <char*> &command, bool &previous) {
 
     return;
 }
+void autorun(vector <char *> &command, bool &comments, bool &previous, bool &isTest) {
+    if (command.size() >= 1 && previous && !comments) {
+      
+        if (isTest) {
+            
+            command.push_back('\0');
+            runTest(command);
+        }
+        else {
+            
+            runcmd(command);
+            
+        }
+        //even though there may be no comments/connectors,
+        //we still need to exec the command 
+    }
+    return;
+  //does nothing if it has comments (#) or is a connector command
+}
+
+void frontParanthesis (vector <char *> &command, bool &previous, bool &falseP) {
+	if (previous == false)
+        {
+
+                falseP = true;
+
+        }
+        else if (previous == true)
+        {
+
+                command.pop_back(); 
+        }
+    return;
+}
+void backParanthesis (vector <char *> &command, bool &previous, bool &falseP) {
+
+	 if (falseP == true)
+            {
+                
+                falseP = false;
+                //clear cmnd 
+                command.clear();
+
+            }
+            else if (falseP == false)
+            {
+                command.pop_back();
+            }
+
+}
+
+void correctPar(bool &parError, int &LeftPar, int &RightPar) {
+	
+	//if there are an equal number of () then it ignores it
+	//manually outputting error if needed
+	if (RightPar > LeftPar) {
+	   cout << "syntax error near unexpected token (" << endl;
+	   parError = true;
+    }
+	else if (LeftPar > RightPar) {
+	   cout << "syntax error near unexpected token (" << endl;
+	   parError = true;
+	}
+	else
+	{
+	    return;
+	}
+	
+	return;
+}
 
 typedef tokenizer<char_separator<char> > token;
 
@@ -121,6 +292,14 @@ int main(int argc, char **argv) {
     
     bool previous = true;
     bool comments = true;
+    bool isTest = false;
+    bool tested = false;
+    bool parError = false;
+    bool falseP = false;
+    bool firstfail = false;
+    
+    int LeftPar = 0;
+    int RightPar = 0;
 
     while (true) {
         
@@ -130,52 +309,120 @@ int main(int argc, char **argv) {
         parse.clear();
         previous = true;
         comments = false;
-        
+        tested = false;
+        parError = false;
+        firstfail = false;
+        isTest = false;
+        falseP = false;
+        LeftPar = 0;
+        RightPar = 0;
         
         cout << userName << "@" << (getUserName(userName)) <<  "$ ";
+        // cout << "$ ";
         getline(cin, commandString);
+
         char_separator<char> delim(" ", delimitor);
         tokenizer< char_separator<char> > token(commandString, delim);
        
 
         for (token::iterator it = token.begin(); it != token.end(); it++) { 
+            
             parse.push_back(*it);
             
+            //parentheses check, if equal amount then its valid
+            if (*it == "(") { 
+                   
+                   LeftPar++;
+               }
+               else if (*it == ")") {
+                   
+                   RightPar++;
+               }
+            
         }
+        
+        correctPar(parError, LeftPar, RightPar); //parentheses have to be equal amount or else the input is invalid
 
         for (unsigned i = 0; i < parse.size(); i++) {
            command.push_back(const_cast<char*>(parse.at(i).c_str()));
+           
+            tested = false;
+
+            const char* temp = command.at(command.size() - 1);
+           
+            if (isTest == true) {
+                if (strcmp(temp, "&&") == 0) {
+                    TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
+                }
+                
+                else if (strcmp(temp, "||") == 0) {
+                   TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
+                }
+                
+                else if (strcmp(temp, ";") == 0) {
+                    TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
+                }
+            }
+
+           
             
-            if (strcmp(command.at(command.size() - 1), "exit") == 0) { 
+            if (strcmp(command.at(command.size() - 1), "exit") == 0) { //checks if exit is passed in
                 exit(0);
             }
             
-            else if (strcmp(command.at(command.size() - 1), "#") == 0) {
+            else if (strcmp(command.at(command.size() - 1), "#") == 0) { //check if # passed in
                 commentCommand(command, comments);
             }
-            else if (strcmp(command.at(command.size() - 1), ";") == 0) {
+            else if (strcmp(command.at(command.size() - 1), ";") == 0) {  //check if ; passed in
                 
                 commandSemicolon(command);
 
             }
-            else if(strcmp(command.at(command.size() - 1), "&&") == 0) {
+            else if(strcmp(command.at(command.size() - 1), "&&") == 0) { //check if && used
                 
                 commandAnd(command, previous);
                 
             }
+            else if (strcmp(command.at(command.size() - 1), "test") == 0) { //check if test used
+                
+                isTest = true;
+                	
+            }
             
-            else if (strcmp(command.at(command.size() - 1), "||") == 0) {
+            else if (strcmp(command.at(command.size() - 1), "||") == 0) { //check if || used
+                
                 commandOr(command, previous);
+            }
+            
+            else if (strcmp(command.at(command.size() - 1), "[") == 0) { //check if [ passed in
+                
+                isTest = true;
+            }
+            
+            else if (strcmp(command.at(command.size() - 1), "]") == 0){ //check if ] passed in
+            
+                //delete it and do nothing
+                command.pop_back();
+            }
+            else if (strcmp(command.at(command.size() - 1), "(") == 0) { //check if ( passed in
+            	
+            	frontParanthesis(command, previous, falseP);
+            }
+        
+            else if (strcmp(command.at(command.size() - 1), ")") == 0) { //check if ) passed in
+            	
+            	backParanthesis(command, previous, falseP);
+            }
+            else if(parError)
+            {
+                previous = false;
             }
 
         }
         
         
-         if (command.size() >= 1 && previous && !comments) {
-            runcmd(command);
-        }
+        autorun(command, comments, previous, isTest); //executes command
         
-    
     }  
     
     return 0; 
