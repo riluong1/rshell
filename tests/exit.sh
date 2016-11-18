@@ -23,3 +23,22 @@ ls; pwd || exit
 ls ; pwd && exit
 
 aeiorjeao && exit
+
+test exit
+
+test -e exit
+
+test -f exit
+
+exit test
+
+exit test -e
+
+[ exit ]
+
+[ -e exit ]
+
+[ -e exit ] #joisfjsadfjdsa
+
+[ -e exit ]                                 && exit
+
