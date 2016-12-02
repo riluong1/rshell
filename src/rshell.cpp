@@ -69,7 +69,7 @@ void CDcommand( vector<string> command)
     }
     // else if(strcmp(command.at(command.size() - 1), "-") == 0))
     // {
-        num = chdir(setenv)
+        //num = chdir(setenv)
     // }
         else
         {
@@ -351,7 +351,7 @@ int main(int argc, char **argv) {
         LeftPar = 0;
         RightPar = 0;
         
-        //cout << userName << "@" << (getUserName(userName)) <<  "$ ";
+
         char cwd[1024];
 		if (getcwd(cwd, sizeof(cwd)) == NULL)
 		{
@@ -361,8 +361,8 @@ int main(int argc, char **argv) {
 		{
 			cout<< cwd << endl;
 		}
-        
-        cout << "$ ";
+        cout << userName << "@" << (getUserName(userName)) <<  "$ ";    
+        //cout << "$ ";
         getline(cin, commandString);
 
         char_separator<char> delim(" ", delimitor);
