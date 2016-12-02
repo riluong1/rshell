@@ -54,6 +54,35 @@ bool runcmd (vector <char*> command) {
     return false;
 }
 
+void CDcommand( vector<string> command)
+{
+    int num;
+    cout << command.size();
+    if (command.size() == 1)
+    {
+        num = chdir(getenv("HOME"));
+        
+        if (num == -1)
+        {
+            perror("error with cd");
+        }
+    }
+    // else if(strcmp(command.at(command.size() - 1), "-") == 0))
+    // {
+        num = chdir(setenv)
+    // }
+        else
+        {
+            num = chdir(command.at(command.size() - 1).c_str());
+            if (num == -1)
+            {
+                perror("error with cd");
+            }
+        }
+    
+    
+    return;
+}
 bool runTest(vector <char*> command)
 {
     //pops null character
@@ -209,13 +238,18 @@ void commandOr (vector <char*> &command, bool &previous) {
 
     return;
 }
-void autorun(vector <char *> &command, bool &comments, bool &previous, bool &isTest) {
-    if (command.size() >= 1 && previous && !comments) {
+void autorun(vector <char *> &command, bool &comments, bool &previous, bool &isTest, vector <string> parsed) {
+    if (command.size() == 1 && previous && !comments) {
       
         if (isTest) {
             
             command.push_back('\0');
             runTest(command);
+        }
+        else if (strcmp(command.at(command.size() - 1), "cd") == 0 )
+        {
+            // command.push_back('\0');
+            CDcommand(parsed);
         }
         else {
             
@@ -317,8 +351,18 @@ int main(int argc, char **argv) {
         LeftPar = 0;
         RightPar = 0;
         
-        cout << userName << "@" << (getUserName(userName)) <<  "$ ";
-        // cout << "$ ";
+        //cout << userName << "@" << (getUserName(userName)) <<  "$ ";
+        char cwd[1024];
+		if (getcwd(cwd, sizeof(cwd)) == NULL)
+		{
+			perror("Printing current directory error");
+		}
+	    else 
+		{
+			cout<< cwd << endl;
+		}
+        
+        cout << "$ ";
         getline(cin, commandString);
 
         char_separator<char> delim(" ", delimitor);
@@ -383,6 +427,10 @@ int main(int argc, char **argv) {
                 commandAnd(command, previous);
                 
             }
+            else if(strcmp(command.at(command.size() - 1), "cd") == 0 ) {
+                
+                CDcommand(parse);
+            }
             else if (strcmp(command.at(command.size() - 1), "test") == 0) { //check if test used
                 
                 isTest = true;
@@ -421,10 +469,11 @@ int main(int argc, char **argv) {
         }
         
         
-        autorun(command, comments, previous, isTest); //executes command
+        autorun(command, comments, previous, isTest, parse); //executes command
         
     }  
     
     return 0; 
 }
+
 
