@@ -17,3 +17,9 @@ This rshell program simulates the bash executables and the Unix interpreter comm
 - Some chains of commands produce incorrect input specifically involving the AND and OR connectors.
 
 - When using the precedence operator, if a ( or ) is missing, rshell will not wait for a finishing or starting parentheses. It will print out an error message.
+
+- CD only works if you use it by itself. Chaining CD with other commands will cause it to fail.
+
+- Once you use CD, our program no longer can no longer create files or directories.
+
+- If the getusername function fails, the current directory we are in will not print.
