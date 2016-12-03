@@ -6,7 +6,15 @@ cd
 
 cd ..
 
-mkdir hi
+mkdir hi ; ls ; cd hi
+
+cd hi && cd
+
+cd || ls
+
+cd hi ; ls && cd
+
+asdaerea || cd
 
 cd hi/
 
