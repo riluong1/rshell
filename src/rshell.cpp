@@ -54,6 +54,44 @@ bool runcmd (vector <char*> command) {
     return false;
 }
 
+bool CDcommand( vector<string> command)
+{
+    int num;
+    
+    if (command.size() == 1)
+    {
+        num = chdir(getenv("HOME"));  // goes to the home directory
+        
+        if (num == -1)
+        {
+            perror("error with cd");
+        }
+        return true;
+    }
+    
+    else if(strcmp(const_cast<char*>(command.at(command.size() - 1).c_str()), "-") == 0)  // checks if '-' is entered
+    {
+        num = chdir("..");
+        
+        if (num == -1)
+        {
+            perror ("error with cd");
+        }
+        return true;
+}
+
+        else
+        {
+            num = chdir(command.at(command.size() - 1).c_str());
+            if (num == -1)
+            {
+                perror("error with cd");
+            }
+            return true;
+        }
+        
+        return false;
+}
 bool runTest(vector <char*> command)
 {
     //pops null character
@@ -155,7 +193,6 @@ void TestConnectorCheck(vector <char*> &command, bool &previous, bool &firstfail
         return;
 }
 
-
 string getUserName (char *userName) {
     char hostName[1024];
     if(gethostname(hostName, sizeof hostName) == -1) {
@@ -209,13 +246,18 @@ void commandOr (vector <char*> &command, bool &previous) {
 
     return;
 }
-void autorun(vector <char *> &command, bool &comments, bool &previous, bool &isTest) {
-    if (command.size() >= 1 && previous && !comments) {
+void autorun(vector <char *> &command, bool &comments, bool &previous, bool &isTest, vector <string> parsed) {
+    if (command.size() == 1 && previous && !comments) {
       
         if (isTest) {
             
             command.push_back('\0');
             runTest(command);
+        }
+        else if (strcmp(command.at(command.size() - 1), "cd") == 0 )
+        {
+            // command.push_back('\0');
+            CDcommand(parsed);
         }
         else {
             
@@ -317,9 +359,21 @@ int main(int argc, char **argv) {
         LeftPar = 0;
         RightPar = 0;
         
-        cout << userName << "@" << (getUserName(userName)) <<  "$ ";
-        // cout << "$ ";
+        
+        char cwd[1024];
+		if (getcwd(cwd, sizeof(cwd)) == NULL) 
+		{
+			perror("Printing current directory error");  // Prints error if getcwd fails
+		}
+	    else 
+		{
+			cout<< cwd << endl;  // Prints the current working directory
+		}
+		
+        cout << userName << "@" << (getUserName(userName)) <<  "$ ";  // prints username
+        //cout << "$ ";
         getline(cin, commandString);
+
 
         char_separator<char> delim(" ", delimitor);
         tokenizer< char_separator<char> > token(commandString, delim);
@@ -363,9 +417,7 @@ int main(int argc, char **argv) {
                     TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
                 }
             }
-
            
-            
             if (strcmp(command.at(command.size() - 1), "exit") == 0) { //checks if exit is passed in
                 exit(0);
             }
@@ -382,6 +434,10 @@ int main(int argc, char **argv) {
                 
                 commandAnd(command, previous);
                 
+            }
+            else if(strcmp(command.at(command.size() - 1), "cd") == 0 ) { // checks if cd is used
+                
+                CDcommand(parse);
             }
             else if (strcmp(command.at(command.size() - 1), "test") == 0) { //check if test used
                 
@@ -421,10 +477,11 @@ int main(int argc, char **argv) {
         }
         
         
-        autorun(command, comments, previous, isTest); //executes command
+        autorun(command, comments, previous, isTest, parse); //executes command
         
     }  
     
     return 0; 
 }
+
 
