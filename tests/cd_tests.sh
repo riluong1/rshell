@@ -28,7 +28,18 @@ cd -
 
 cd hi/bye/
 
-cd -
+cd                     -
+
+cd - #jioafhsiajfsalkf
+
+cd                   -    #iafjsaifoiweahf
+
+cd -#jfiafjsa
+
+cd#poijasfj
+
+cd#jioafjjioasf
+
 
 
 
