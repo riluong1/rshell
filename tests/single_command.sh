@@ -33,3 +33,15 @@ cat newfile
 vim Tests.txt
 
 yes
+
+cd                     -
+
+cd - #jioafhsiajfsalkf
+
+cd                   -    #iafjsaifoiweahf
+
+cd -#jfiafjsa
+
+cd#poijasfj
+
+cd#jioafjjioasf
