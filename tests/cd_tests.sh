@@ -24,5 +24,13 @@ cd ..
 
 cd bye
 
+cd -
+
+cd hi/bye/
+
+cd -
+
+
+
 
 
