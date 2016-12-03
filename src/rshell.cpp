@@ -54,23 +54,32 @@ bool runcmd (vector <char*> command) {
     return false;
 }
 
-void CDcommand( vector<string> command)
+bool CDcommand( vector<string> command)
 {
     int num;
-    cout << command.size();
+    
     if (command.size() == 1)
     {
-        num = chdir(getenv("HOME"));
+        num = chdir(getenv("HOME"));  // goes to the home directory
         
         if (num == -1)
         {
             perror("error with cd");
         }
+        return true;
     }
-    // else if(strcmp(command.at(command.size() - 1), "-") == 0))
-    // {
-        //num = chdir(setenv)
-    // }
+    
+    else if(strcmp(const_cast<char*>(command.at(command.size() - 1).c_str()), "-") == 0)  // checks if '-' is entered
+    {
+        num = chdir("..");
+        
+        if (num == -1)
+        {
+            perror ("error with cd");
+        }
+        return true;
+}
+
         else
         {
             num = chdir(command.at(command.size() - 1).c_str());
@@ -78,10 +87,10 @@ void CDcommand( vector<string> command)
             {
                 perror("error with cd");
             }
+            return true;
         }
-    
-    
-    return;
+        
+        return false;
 }
 bool runTest(vector <char*> command)
 {
@@ -183,7 +192,6 @@ void TestConnectorCheck(vector <char*> &command, bool &previous, bool &firstfail
             tested = true;
         return;
 }
-
 
 string getUserName (char *userName) {
     char hostName[1024];
@@ -351,19 +359,21 @@ int main(int argc, char **argv) {
         LeftPar = 0;
         RightPar = 0;
         
-
+        
         char cwd[1024];
-		if (getcwd(cwd, sizeof(cwd)) == NULL)
+		if (getcwd(cwd, sizeof(cwd)) == NULL) 
 		{
-			perror("Printing current directory error");
+			perror("Printing current directory error");  // Prints error if getcwd fails
 		}
 	    else 
 		{
-			cout<< cwd << endl;
+			cout<< cwd << endl;  // Prints the current working directory
 		}
-        cout << userName << "@" << (getUserName(userName)) <<  "$ ";    
+		
+        cout << userName << "@" << (getUserName(userName)) <<  "$ ";  // prints username
         //cout << "$ ";
         getline(cin, commandString);
+
 
         char_separator<char> delim(" ", delimitor);
         tokenizer< char_separator<char> > token(commandString, delim);
@@ -407,9 +417,7 @@ int main(int argc, char **argv) {
                     TestConnectorCheck(command, previous, firstfail, isTest, tested, temp);
                 }
             }
-
            
-            
             if (strcmp(command.at(command.size() - 1), "exit") == 0) { //checks if exit is passed in
                 exit(0);
             }
@@ -427,7 +435,7 @@ int main(int argc, char **argv) {
                 commandAnd(command, previous);
                 
             }
-            else if(strcmp(command.at(command.size() - 1), "cd") == 0 ) {
+            else if(strcmp(command.at(command.size() - 1), "cd") == 0 ) { // checks if cd is used
                 
                 CDcommand(parse);
             }
