@@ -23,3 +23,5 @@ This rshell program simulates the bash executables and the Unix interpreter comm
 - Once you use CD, our program no longer can no longer create files or directories.
 
 - If the getusername function fails, the current directory we are in will not print.
+
+- Pretty much don't use CD at all, it is very buggy.
